@@ -2,7 +2,7 @@
 
 ![SwiftPM Compatible](https://img.shields.io/badge/SwiftPM-1.0.0-blue.svg)
 ![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
-![iOS 15+](https://img.shields.io/badge/iOS-15+-lightgrey.svg)
+![iOS 16+](https://img.shields.io/badge/iOS-16+-lightgrey.svg)
 ![Swift 5.7+](https://img.shields.io/badge/Swift-5.7+-orange.svg)
 
 **Your ultimate SwiftUI toolkit** — a collection of reusable, production-ready components and utilities for building beautiful iOS apps effortlessly.  
