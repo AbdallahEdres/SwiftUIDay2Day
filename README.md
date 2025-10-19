@@ -17,6 +17,7 @@ SwiftUI Day2Day is a production-ready Swift Package containing battle-tested UI 
 - **MainButtonStyle** - Primary filled button with customizable color
 - **OutlinedButtonStyle** - Outlined button with border
 - **UnderlinedTextButtonStyle** - Text-only underlined button
+![Button Styles](Assets/1.png)
 
 ### 🔘 Selection Components
 - **SelectableItem Protocol** - Protocol for selectable items
