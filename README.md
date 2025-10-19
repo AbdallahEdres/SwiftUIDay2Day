@@ -200,10 +200,6 @@ SwiftUIDay2Day/
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
-## 📄 License
-
-This project is licensed under the MIT License.
-
 ## 👨‍💻 Author
 
 Created by Abdallah Edres
@@ -216,5 +212,4 @@ Created by Abdallah Edres
 ---
 
 **Note**: This is a component library. Import it into your iOS project to use the components.
-# SwiftUIDay2Day
 # SwiftUIDay2Day
