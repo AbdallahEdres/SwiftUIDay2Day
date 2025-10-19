@@ -1,11 +1,19 @@
-# SwiftUI Day2Day
+# 🌟 SwiftUI Day2Day
 
-A comprehensive collection of reusable SwiftUI components for iOS development.
+![SwiftPM Compatible](https://img.shields.io/badge/SwiftPM-1.0.0-blue.svg)
+![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
+![iOS 15+](https://img.shields.io/badge/iOS-15+-lightgrey.svg)
+![Swift 5.7+](https://img.shields.io/badge/Swift-5.7+-orange.svg)
+
+**Your ultimate SwiftUI toolkit** — a collection of reusable, production-ready components and utilities for building beautiful iOS apps effortlessly.  
+
+---
 
 ## 🎯 Overview
 
-SwiftUI Day2Day is a production-ready Swift Package containing battle-tested UI components and utilities for building modern iOS applications with SwiftUI.
+SwiftUI Day2Day is a **battle-tested Swift Package** designed to speed up your SwiftUI development. Build forms, buttons, selection lists, and more — all consistent, flexible, and ready for production.  
 
+---
 ## ✨ Features
 
 ### 📝 Form Components
