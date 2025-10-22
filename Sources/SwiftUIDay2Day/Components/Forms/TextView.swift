@@ -134,3 +134,46 @@ private final class SelfSizingTextView: UITextView {
         return CGSize(width: UIView.noIntrinsicMetric, height: newSize.height)
     }
 }
+// MARK: - Preview
+
+struct TextView_Previews: PreviewProvider {
+    @State static var sampleText: String? = "Hello, SwiftUI! This is a plain text preview."
+    @State static var sampleAttributedText: NSAttributedString? = {
+        let attrString = NSMutableAttributedString(string: "Hello, SwiftUI! This is an attributed text preview.")
+        attrString.addAttribute(.foregroundColor, value: UIColor.systemBlue, range: NSRange(location: 0, length: 5))
+        attrString.addAttribute(.font, value: UIFont.boldSystemFont(ofSize: 18), range: NSRange(location: 7, length: 6))
+        return attrString
+    }()
+    
+    static var previews: some View {
+        VStack(spacing: 20) {
+            Text("Plain Text Preview")
+                .font(.headline)
+            
+            TextView(
+                text: $sampleText,
+                isEditable: true,
+                font: UIFont.systemFont(ofSize: 16),
+                textColor: .black
+            )
+            .padding()
+            .background(Color.gray.opacity(0.1))
+            .cornerRadius(8)
+            
+            Text("Attributed Text Preview")
+                .font(.headline)
+            
+            TextView(
+                attributedText: $sampleAttributedText,
+                isEditable: true,
+                font: UIFont.systemFont(ofSize: 16),
+                textColor: .black
+            )
+            .padding()
+            .background(Color.gray.opacity(0.1))
+            .cornerRadius(8)
+        }
+        .padding()
+        .previewLayout(.sizeThatFits)
+    }
+}

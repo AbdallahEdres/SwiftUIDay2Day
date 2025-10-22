@@ -28,6 +28,13 @@ SwiftUI Day2Day is a **battle-tested Swift Package** designed to speed up your S
 - **OTPView** - One-time password input with auto-focus and completion callback
 ![OTPView](Assets/3.png)
 
+
+- **TextView** - Rich text view supporting plain and attributed text, auto-sizing, and interactive links, emails, and phone numbers.
+- Ideal for displaying Terms & Conditions, contact info, instructions, or rich content
+- Supports custom font, color, and editable mode.
+- Uses Coordinator to bridge UIKit delegates to SwiftUI.
+![TextView](Assets/7.png)
+
 ### 🎨 Button Styles
 - **MainButtonStyle** - Primary filled button with customizable color
 - **OutlinedButtonStyle** - Outlined button with border
