@@ -1,43 +1,31 @@
 //
 //  LabeledTextField.swift
-//  SwiftUIDay2Day
+//  SwiftUiBase
 //
 //  Created by Abdallah Edres on 03/09/2025.
 //
 
 import SwiftUI
 
-public struct LabeledTextField: View {
+struct LabeledTextField: View {
     
-    @Binding private var text: String
-    @Binding private var errorMessage: String?
+    // MARK: - Bindings
+    @Binding var text: String
+    @Binding var errorMessage: String?
+    
+    // MARK: - Focus
     @FocusState private var isFocused: Bool
     
-    private let placeHolder: String
-    private let label: String
-    private let isRequired: Bool
-    private let image: Image?
-    private let trailingImage: Image?
-    
-    public init(
-        text: Binding<String>,
-        errorMessage: Binding<String?> = .constant(nil),
-        placeHolder: String,
-        label: String,
-        isRequired: Bool = true,
-        image: Image? = nil,
-        trailingImage: Image? = nil
-    ) {
-        self._text = text
-        self._errorMessage = errorMessage
-        self.placeHolder = placeHolder
-        self.label = label
-        self.isRequired = isRequired
-        self.image = image
-        self.trailingImage = trailingImage
-    }
-    
-    public var body: some View {
+    // MARK: - Configuration
+    var placeHolder: String
+    var label: String
+    var isRequired: Bool = true
+    var image: Image?
+    var trailingImage: Image? = nil
+    var keyboardType: UIKeyboardType = .default
+    var fieldBackgroundColor: Color = Color.white
+    // MARK: - Body
+    var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             labelView
             textField
@@ -46,36 +34,46 @@ public struct LabeledTextField: View {
             }
         }
     }
+}
+
+// MARK: - Subviews
+private extension LabeledTextField {
     
-    private var labelView: some View {
+    // MARK: Label
+    var labelView: some View {
         HStack(spacing: 4) {
             Text(label)
                 .appText(.bodyRegular)
             
             if !isRequired {
-                Text("(Optional)")
-                    .appText(.caption, color: .gray)
+                Text("optional_label".baseLocalizable)
+                    .appText(.caption, color: .appPlaceHolder)
             }
         }
     }
     
-    private var textField: some View {
+    // MARK: TextField
+    var textField: some View {
         HStack(spacing: 8) {
+            // Leading Icon
             if let image {
                 image
                     .renderingMode(.template)
-                    .foregroundStyle(text.isEmpty ? .gray : .blue)
+                    .foregroundStyle(text.isEmpty ? Color.gray : Color.main)
                     .frame(width: 24, height: 24)
             }
             
+            // Input Field
             TextField(placeHolder, text: $text)
                 .appText(.bodyRegular)
                 .focused($isFocused)
+                .keyboardType(keyboardType)
             
+            // Trailing Icon
             if let trailingImage {
                 trailingImage
                     .renderingMode(.template)
-                    .foregroundStyle(text.isEmpty ? .gray : .blue)
+                    .foregroundStyle(text.isEmpty ? Color.gray : Color.main)
                     .frame(width: 20, height: 20)
             }
         }
@@ -83,70 +81,22 @@ public struct LabeledTextField: View {
         .frame(height: 48)
         .background(
             RoundedRectangle(cornerRadius: 8)
-                .fill(Color(.systemBackground))
+                .fill(fieldBackgroundColor)
         )
         .overlay(
             RoundedRectangle(cornerRadius: 8)
                 .stroke(
-                    (isFocused || !text.isEmpty) ? .blue : .clear,
+                    (isFocused || !text.isEmpty) ? Color.main : Color.appPlaceHolder,
                     lineWidth: 1
                 )
+                .padding(0.5)
         )
         .animation(.easeInOut(duration: 0.2), value: isFocused)
     }
     
-    private var errorView: some View {
+    // MARK: Error Label
+    var errorView: some View {
         Text(errorMessage ?? "")
             .appText(.bodyRegular, color: .red)
-    }
-}
-
-struct LabeledTextField_Previews: PreviewProvider {
-    static var previews: some View {
-        ZStack {
-            Color.gray.opacity(0.1).ignoresSafeArea()
-            
-            VStack(spacing: 20) {
-                StatefulPreviewWrapper("John Doe", "Name is required") { text, error in
-                    LabeledTextField(
-                        text: text,
-                        errorMessage: error,
-                        placeHolder: "Enter your name",
-                        label: "Full Name",
-                        image: Image(systemName: "person.fill"),
-                        trailingImage: Image(systemName: "checkmark.circle")
-                    )
-                }
-                
-                StatefulPreviewWrapper("", nil) { text, error in
-                    LabeledTextField(
-                        text: text,
-                        errorMessage: error,
-                        placeHolder: "Enter your email",
-                        label: "Email",
-                        image: Image(systemName: "envelope"),
-                        trailingImage: nil
-                    )
-                }
-            }
-            .padding()
-        }
-        .previewLayout(.sizeThatFits)
-    }
-}
-
-struct StatefulPreviewWrapper<Value, Content: View>: View {
-    @State private var value: Value
-    let content: (Binding<Value>, Binding<String?>) -> Content
-    @State private var error: String? = nil
-    
-    init(_ value: Value, _ error: String?, @ViewBuilder content: @escaping (Binding<Value>, Binding<String?>) -> Content) {
-        _value = State(initialValue: value)
-        _error = State(initialValue: error)
-        self.content = content
-    }
-    
-    var body: some View {
-        content($value, $error)
     }
 }
