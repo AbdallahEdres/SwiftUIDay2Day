@@ -15,6 +15,7 @@ struct TextView: UIViewRepresentable {
     // MARK: - Bindings
     @Binding var text: String?
     @Binding var attributedText: NSAttributedString?
+    @Binding var isFocused: Bool
     
     // MARK: - Configuration
     private let isEditable: Bool
@@ -27,28 +28,32 @@ struct TextView: UIViewRepresentable {
     init(
         text: Binding<String?>,
         isEditable: Bool = true,
-        font: UIFont? = nil,
-        textColor: Color = .black
+        font: UIFont? = UIFont(name: AppFontWeight.regularAppFont.rawValue, size: 14),
+        textColor: Color = .black,
+        isFocused: Binding<Bool> = .constant(false)
     ) {
         _text = text
         self._attributedText = .constant(nil)
         self.isEditable = isEditable
         self.font = font
         self.textColor = textColor
+        self._isFocused = isFocused
     }
     
     /// Initialize with attributed text binding
     init(
         attributedText: Binding<NSAttributedString?>,
         isEditable: Bool = true,
-        font: UIFont? = nil,
-        textColor: Color = .black
+        font: UIFont? = UIFont(name: AppFontWeight.regularAppFont.rawValue, size: 14),
+        textColor: Color = .black,
+        isFocused: Binding<Bool> = .constant(false)
     ) {
         _text = .constant(nil)
         self._attributedText = attributedText
         self.isEditable = isEditable
         self.font = font
         self.textColor = textColor
+        self._isFocused = isFocused
     }
     
     // MARK: - UIViewRepresentable
@@ -56,12 +61,13 @@ struct TextView: UIViewRepresentable {
     func makeUIView(context: Context) -> UITextView {
         // Use self-sizing subclass to enable automatic height adjustment
         let textView = SelfSizingTextView()
+        textView.delegate = context.coordinator
         
         // Assign text or attributed text if available
-        if let _ = self.text {
-            textView.text = self.text
-        } else if let _ = self.attributedText {
-            textView.attributedText = self.attributedText
+        if let text = self.text {
+            textView.text = text
+        } else if let attributedText = self.attributedText {
+            textView.attributedText = attributedText
         }
         
         // Apply appearance
@@ -77,6 +83,7 @@ struct TextView: UIViewRepresentable {
         
         // Allow the view to expand vertically in SwiftUI layouts
         textView.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        textView.inputAccessoryView = makeKeyboardToolbar(target: context.coordinator)
         
         return textView
     }
@@ -99,9 +106,41 @@ struct TextView: UIViewRepresentable {
             // Apply custom text color
             let uiColor = UIColor(self.textColor)
             mutable.addAttribute(.foregroundColor, value: uiColor, range: fullRange)
-            
             uiView.attributedText = mutable
         }
+        
+        // Handle focus changes from SwiftUI
+        let isCurrentlyFirstResponder = uiView.isFirstResponder
+        if isFocused && !isCurrentlyFirstResponder {
+            context.coordinator.isProgrammaticChange = true
+            DispatchQueue.main.async {
+                uiView.becomeFirstResponder()
+                context.coordinator.isProgrammaticChange = false
+            }
+        } else if !isFocused && isCurrentlyFirstResponder {
+            context.coordinator.isProgrammaticChange = true
+            DispatchQueue.main.async {
+                uiView.resignFirstResponder()
+                context.coordinator.isProgrammaticChange = false
+            }
+        }
+    }
+    
+    // MARK: - Keyboard Toolbar
+    private func makeKeyboardToolbar(target: Any?) -> UIView {
+        let toolbar = UIToolbar()
+        toolbar.sizeToFit()
+        
+        let flexible = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
+        let done = UIBarButtonItem(
+            title: "keyboard_done".baseLocalizable,
+            style: .done,
+            target: target,
+            action: #selector(Coordinator.dismissKeyboard)
+        )
+        
+        toolbar.items = [flexible, done]
+        return toolbar
     }
     
     func makeCoordinator() -> Coordinator {
@@ -111,6 +150,7 @@ struct TextView: UIViewRepresentable {
     // MARK: - Coordinator
     class Coordinator: NSObject, UITextViewDelegate {
         var parent: TextView
+        var isProgrammaticChange = false
         
         init(parent: TextView) {
             self.parent = parent
@@ -120,6 +160,29 @@ struct TextView: UIViewRepresentable {
             // Sync text binding and trigger layout update
             parent.text = textView.text
             textView.invalidateIntrinsicContentSize()
+        }
+        
+        func textViewDidBeginEditing(_ textView: UITextView) {
+            guard !isProgrammaticChange else { return }
+            DispatchQueue.main.async { [weak self] in
+                self?.parent.isFocused = true
+            }
+        }
+        
+        func textViewDidEndEditing(_ textView: UITextView) {
+            if textView.text.trimWhiteSpace().isEmpty{
+                textView.text = ""
+                parent.text = ""
+            }
+            guard !isProgrammaticChange else { return }
+            DispatchQueue.main.async { [weak self] in
+                self?.parent.isFocused = false
+            }
+            
+        }
+        
+        @objc func dismissKeyboard() {
+            parent.isFocused = false
         }
     }
 }
@@ -132,48 +195,5 @@ private final class SelfSizingTextView: UITextView {
         let size = CGSize(width: bounds.width, height: .greatestFiniteMagnitude)
         let newSize = sizeThatFits(size)
         return CGSize(width: UIView.noIntrinsicMetric, height: newSize.height)
-    }
-}
-// MARK: - Preview
-
-struct TextView_Previews: PreviewProvider {
-    @State static var sampleText: String? = "Hello, SwiftUI! This is a plain text preview."
-    @State static var sampleAttributedText: NSAttributedString? = {
-        let attrString = NSMutableAttributedString(string: "Hello, SwiftUI! This is an attributed text preview.")
-        attrString.addAttribute(.foregroundColor, value: UIColor.systemBlue, range: NSRange(location: 0, length: 5))
-        attrString.addAttribute(.font, value: UIFont.boldSystemFont(ofSize: 18), range: NSRange(location: 7, length: 6))
-        return attrString
-    }()
-    
-    static var previews: some View {
-        VStack(spacing: 20) {
-            Text("Plain Text Preview")
-                .font(.headline)
-            
-            TextView(
-                text: $sampleText,
-                isEditable: true,
-                font: UIFont.systemFont(ofSize: 16),
-                textColor: .black
-            )
-            .padding()
-            .background(Color.gray.opacity(0.1))
-            .cornerRadius(8)
-            
-            Text("Attributed Text Preview")
-                .font(.headline)
-            
-            TextView(
-                attributedText: $sampleAttributedText,
-                isEditable: true,
-                font: UIFont.systemFont(ofSize: 16),
-                textColor: .black
-            )
-            .padding()
-            .background(Color.gray.opacity(0.1))
-            .cornerRadius(8)
-        }
-        .padding()
-        .previewLayout(.sizeThatFits)
     }
 }
